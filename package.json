@@ -1,0 +1,17 @@
+{
+  "name": "swisstronik-sdi-contracts",
+  "dependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.0.2",
+    "@swisstronik/utils": "^1.2.1",
+    "dotenv": "^16.4.5",
+    "hardhat": "^2.20.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7"
+  },
+  "scripts": {
+    "hardhat:compile": "hardhat compile --force",
+    "hardhat:deploy": "hardhat run scripts/deploy.ts --network testnet"
+  }
+}
