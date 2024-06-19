@@ -187,4 +187,89 @@ contract SWTRImplementation is Ownable {
 
         revert("Verification with country not found");
     }
+
+    function decodeQuadrataPassportV1OriginalData(
+        bytes memory originalData
+    )
+        public
+        pure
+        returns (
+            uint8 aml,
+            string memory country,
+            string memory did,
+            bool isBusiness,
+            bool investorStatus
+        )
+    {
+        (aml, country, did, isBusiness, investorStatus) = abi.decode(
+            originalData,
+            (uint8, string, string, bool, bool)
+        );
+    }
+
+    function decodeWorldcoinV1OriginalData(
+        bytes memory originalData
+    )
+        public
+        pure
+        returns (
+            string memory merkle_root,
+            string memory nullifier_hash,
+            string memory proof,
+            string memory verification_level
+        )
+    {
+        (merkle_root, nullifier_hash, proof, verification_level) = abi.decode(
+            originalData,
+            (string, string, string, string)
+        );
+    }
+
+    function passedVerificationType(
+        address userAddress,
+        address issuerAddress,
+        IComplianceBridge.VerificationType verificationType
+    ) public view returns (bool) {
+        IComplianceBridge.VerificationData[]
+            memory verificationData = listVerificationData(
+                userAddress,
+                issuerAddress
+            );
+
+        require(verificationData.length > 0, "No verification data found");
+
+        for (uint256 i = 0; i < verificationData.length; i++) {
+            if (
+                verificationData[i].verificationType == uint32(verificationType)
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    function isUserHuman(
+        address userAddress,
+        address issuerAddress
+    ) public view returns (bool) {
+        return
+            passedVerificationType(
+                userAddress,
+                issuerAddress,
+                IComplianceBridge.VerificationType.VT_HUMANITY
+            );
+    }
+
+    function walletPassedAML(
+        address userAddress,
+        address issuerAddress
+    ) public view returns (bool) {
+        return
+            passedVerificationType(
+                userAddress,
+                issuerAddress,
+                IComplianceBridge.VerificationType.VT_AML
+            );
+    }
 }
