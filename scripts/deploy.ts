@@ -16,7 +16,9 @@ async function main() {
   await SWTRProxy.waitForDeployment();
   console.log(`SWTRProxy deployed to ${SWTRProxy.target}`);
 
-  const proxyAdmin = await readContractData(signer.provider, SWTRProxy, "proxyAdmin");
+  const proxyAdmin = (
+    await readContractData(signer.provider, SWTRProxy, "proxyAdmin")
+  )[0];
 
   console.log("Proxy Admin:", proxyAdmin);
 }

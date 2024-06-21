@@ -64,5 +64,5 @@ export const readContractData = async (
     "0"
   );
 
-  return contract.interface.decodeFunctionResult(method, res)[0];
+  return contract.interface.decodeFunctionResult(method, res);
 };

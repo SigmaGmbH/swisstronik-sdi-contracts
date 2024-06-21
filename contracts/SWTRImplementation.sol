@@ -143,7 +143,7 @@ contract SWTRImplementation is OwnableUpgradeable {
         address userAddress,
         address issuerAddress,
         bytes memory verificationId
-    ) public view returns (IComplianceBridge.VerificationData[] memory) {
+    ) public view returns (IComplianceBridge.VerificationData memory) {
         IComplianceBridge.VerificationData[]
             memory verificationData = listVerificationData(
                 userAddress,
@@ -159,7 +159,7 @@ contract SWTRImplementation is OwnableUpgradeable {
                     string(verificationId)
                 )
             ) {
-                return verificationData;
+                return verificationData[i];
             }
         }
 

@@ -8,11 +8,11 @@ async function main() {
     "0xC271c016cBdbbe19e5505a79aAD73e40F4654B3e"
   );
 
-  const issuerCount = await readContractData(
+  const issuerCount = (await readContractData(
     signer.provider,
     contract,
     "issuerRecordCount"
-  );
+  ))[0];
 
   console.log("Issuer Count:", issuerCount);
 
