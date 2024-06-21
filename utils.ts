@@ -1,5 +1,6 @@
 import { decryptNodeResponse, encryptDataField } from "@swisstronik/utils";
 import { network } from "hardhat";
+import { BaseContract, Provider } from "ethers";
 
 const NODE_RPC_URL = (network.config as any).url;
 
@@ -48,4 +49,20 @@ export const sendShieldedQuery = async (
 
   // Decrypt call result
   return await decryptNodeResponse(NODE_RPC_URL, response, usedEncryptedKey);
+};
+
+export const readContractData = async (
+  provider: Provider,
+  contract: BaseContract,
+  method: string,
+  args?: any[]
+) => {
+  const res = await sendShieldedQuery(
+    provider,
+    contract.target as string,
+    contract.interface.encodeFunctionData(method, args),
+    "0"
+  );
+
+  return contract.interface.decodeFunctionResult(method, res)[0];
 };
