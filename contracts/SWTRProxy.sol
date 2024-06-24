@@ -5,8 +5,9 @@ import {TransparentUpgradeableProxy} from "@openzeppelin/contracts/proxy/transpa
 
 contract SWTRProxy is TransparentUpgradeableProxy {
     constructor(
-        address _logic
-    ) TransparentUpgradeableProxy(_logic, msg.sender, "") {}
+        address _logic,
+        bytes memory _data
+    ) TransparentUpgradeableProxy(_logic, msg.sender, _data) {}
 
     // We call upgradeToAndCall to this address
     function proxyAdmin() external virtual returns (address) {

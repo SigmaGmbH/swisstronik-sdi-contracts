@@ -2,10 +2,10 @@
 pragma solidity ^0.8.24;
 
 import {IComplianceBridge} from "./IComplianceBridge.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract SWTRImplementation is Ownable {
+contract SWTRImplementation is OwnableUpgradeable {
     struct Issuer {
         string name;
         address issuerAddress;
@@ -15,20 +15,29 @@ contract SWTRImplementation is Ownable {
     mapping(address => Issuer) public issuerByAddress;
     mapping(address => uint256) issuerIndex;
 
-    constructor() Ownable(msg.sender) {}
+    function initialize() public initializer {
+        __Ownable_init(msg.sender);
+    }
 
-    function addIssuerRecord(
-        string memory name,
-        address issuerAddress
+    function addIssuersRecord(
+        string[] memory name,
+        address[] memory issuerAddress
     ) public onlyOwner {
         require(
-            issuerByAddress[issuerAddress].issuerAddress == address(0),
-            "Issuer already exists"
+            name.length == issuerAddress.length,
+            "Name and address length mismatch"
         );
-        Issuer memory issuer = Issuer(name, issuerAddress);
-        issuers.push(issuer);
-        issuerByAddress[issuerAddress] = issuer;
-        issuerIndex[issuerAddress] = issuers.length - 1;
+
+        for (uint256 i = 0; i < name.length; i++) {
+            require(
+                issuerByAddress[issuerAddress[i]].issuerAddress == address(0),
+                "Issuer already exists"
+            );
+            Issuer memory issuer = Issuer(name[i], issuerAddress[i]);
+            issuers.push(issuer);
+            issuerByAddress[issuerAddress[i]] = issuer;
+            issuerIndex[issuerAddress[i]] = issuers.length - 1;
+        }
     }
 
     function removeIssuerRecord(address issuerAddress) public onlyOwner {
@@ -70,6 +79,10 @@ contract SWTRImplementation is Ownable {
             result[i - start] = issuers[i];
         }
         return result;
+    }
+
+    function issuerRecordCount() public view returns (uint256) {
+        return issuers.length;
     }
 
     function isUserVerified(
@@ -130,7 +143,7 @@ contract SWTRImplementation is Ownable {
         address userAddress,
         address issuerAddress,
         bytes memory verificationId
-    ) public view returns (IComplianceBridge.VerificationData[] memory) {
+    ) public view returns (IComplianceBridge.VerificationData memory) {
         IComplianceBridge.VerificationData[]
             memory verificationData = listVerificationData(
                 userAddress,
@@ -146,7 +159,7 @@ contract SWTRImplementation is Ownable {
                     string(verificationId)
                 )
             ) {
-                return verificationData;
+                return verificationData[i];
             }
         }
 
