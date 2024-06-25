@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { readContractData, sendShieldedTransaction } from "../utils";
+import { sendShieldedTransaction } from "../utils";
 import { TransactionResponse } from "ethers";
 
 async function main() {
