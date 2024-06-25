@@ -6,7 +6,7 @@ async function main() {
   const [signer] = await ethers.getSigners();
   const contract = await ethers.getContractAt(
     "SWTRImplementation",
-    "0xE6864d7873b99b115C19071D6cFC711fDa69c010" // proxy address
+    "0xa7175e81b761793C848FEFE107E0F2475F50D57E" // proxy address
   );
 
   console.log("Adding new records...");
