@@ -1,35 +1,30 @@
 import { ethers } from "hardhat";
-import { readContractData, sendShieldedTransaction } from "../utils";
+import { sendShieldedTransaction } from "../utils";
 import { TransactionResponse } from "ethers";
 
 async function main() {
   const [signer] = await ethers.getSigners();
   const SWTRProxy = await ethers.getContractAt(
     "SWTRProxy",
-    "0xC271c016cBdbbe19e5505a79aAD73e40F4654B3e"
+    "0xE6864d7873b99b115C19071D6cFC711fDa69c010"
   );
-
-  const proxyAdmin = (
-    await readContractData(signer.provider, SWTRProxy, "proxyAdmin")
-  )[0];
-  console.log("Proxy Admin:", proxyAdmin);
 
   const SWTRImplementation = await ethers.deployContract("SWTRImplementation");
   await SWTRImplementation.waitForDeployment();
   console.log(`SWTRImplementation deployed to ${SWTRImplementation.target}`);
 
-  const proxyAdminContract = await ethers.getContractAt(
+  const proxyAdmin = await ethers.getContractAt(
     "ProxyAdmin",
-    proxyAdmin
+    "0x7D50B404b2e05fD2ef408c81690ECf532Be7DCC3"
   );
 
   let tx: TransactionResponse = await sendShieldedTransaction(
     signer,
-    proxyAdminContract.target as string,
-    proxyAdminContract.interface.encodeFunctionData("upgradeAndCall", [
-      SWTRProxy.target as string,
-      SWTRImplementation.target as string,
-      "0x",
+    proxyAdmin.target as string,
+    proxyAdmin.interface.encodeFunctionData("upgradeToAndCall", [
+      SWTRProxy.target as string, //proxy address
+      SWTRImplementation.target as string, // implementation address
+      "0x", // data
     ]),
     "0"
   );

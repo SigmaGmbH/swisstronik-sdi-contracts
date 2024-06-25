@@ -1,5 +1,4 @@
 import { ethers } from "hardhat";
-import { readContractData } from "../utils";
 
 async function main() {
   const [signer] = await ethers.getSigners();
@@ -9,18 +8,17 @@ async function main() {
   await SWTRImplementation.waitForDeployment();
   console.log(`SWTRImplementation deployed to ${SWTRImplementation.target}`);
 
+  const ProxyAdmin = await ethers.deployContract("ProxyAdmin", [signer.address]);
+  await ProxyAdmin.waitForDeployment();
+  console.log(`ProxyAdmin deployed to ${ProxyAdmin.target}`);
+
   const SWTRProxy = await ethers.deployContract("SWTRProxy", [
-    SWTRImplementation.target,
-    SWTRImplementation.interface.encodeFunctionData("initialize"),
+    SWTRImplementation.target, // implementation address
+    ProxyAdmin.target, // admin address
+    SWTRImplementation.interface.encodeFunctionData("initialize", [signer.address]), // data
   ]);
   await SWTRProxy.waitForDeployment();
   console.log(`SWTRProxy deployed to ${SWTRProxy.target}`);
-
-  const proxyAdmin = (
-    await readContractData(signer.provider, SWTRProxy, "proxyAdmin")
-  )[0];
-
-  console.log("Proxy Admin:", proxyAdmin);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
