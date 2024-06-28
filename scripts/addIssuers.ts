@@ -14,10 +14,12 @@ async function main() {
   const issuersToAdd = [
     {
       name: "Quadrata",
+      version: 1,
       address: "0x971CD375a8799ca7F2366104e117C5497243C478",
     },
     {
       name: "Worldcoin",
+      version: 1,
       address: "0x5563712d4923E3220cF94D53dD2f9765969dBac3",
     },
   ];
@@ -27,6 +29,7 @@ async function main() {
     contract.target as string,
     contract.interface.encodeFunctionData("addIssuersRecord", [
       issuersToAdd.map((issuer) => issuer.name),
+      issuersToAdd.map((issuer) => issuer.version),
       issuersToAdd.map((issuer) => issuer.address),
     ]),
     "0"

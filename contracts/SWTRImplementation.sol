@@ -8,6 +8,7 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 contract SWTRImplementation is OwnableUpgradeable {
     struct Issuer {
         string name;
+        uint32 version;
         address issuerAddress;
     }
 
@@ -15,17 +16,22 @@ contract SWTRImplementation is OwnableUpgradeable {
     mapping(address => Issuer) public issuerByAddress;
     mapping(address => uint256) issuerIndex;
 
+    mapping(string name => mapping(uint32 version => address))
+        public issuerAddressByNameAndVersion;
+
     function initialize(address _initialOwner) public initializer {
         __Ownable_init(_initialOwner);
     }
 
     function addIssuersRecord(
         string[] memory name,
+        uint32[] memory version,
         address[] memory issuerAddress
     ) public onlyOwner {
         require(
-            name.length == issuerAddress.length,
-            "Name and address length mismatch"
+            name.length == issuerAddress.length &&
+                name.length == version.length,
+            "Length mismatch"
         );
 
         for (uint256 i = 0; i < name.length; i++) {
@@ -33,14 +39,26 @@ contract SWTRImplementation is OwnableUpgradeable {
                 issuerByAddress[issuerAddress[i]].issuerAddress == address(0),
                 "Issuer already exists"
             );
-            Issuer memory issuer = Issuer(name[i], issuerAddress[i]);
+            Issuer memory issuer = Issuer({
+                name: name[i],
+                version: version[i],
+                issuerAddress: issuerAddress[i]
+            });
             issuers.push(issuer);
             issuerByAddress[issuerAddress[i]] = issuer;
             issuerIndex[issuerAddress[i]] = issuers.length - 1;
+
+            issuerAddressByNameAndVersion[name[i]][version[i]] = issuerAddress[
+                i
+            ];
         }
     }
 
-    function removeIssuerRecord(address issuerAddress) public onlyOwner {
+    function removeIssuerRecord(
+        string memory name,
+        uint32 version
+    ) public onlyOwner {
+        address issuerAddress = issuerAddressByNameAndVersion[name][version];
         require(
             issuerByAddress[issuerAddress].issuerAddress != address(0),
             "Issuer does not exist"
@@ -54,18 +72,15 @@ contract SWTRImplementation is OwnableUpgradeable {
         delete issuerIndex[issuerAddress];
     }
 
-    function updateIssuerRecord(
-        address issuerAddress,
-        string memory name
-    ) public onlyOwner {
-        require(
-            issuerByAddress[issuerAddress].issuerAddress != address(0),
-            "Issuer does not exist"
-        );
-        uint256 index = issuerIndex[issuerAddress];
-        issuers[index].name = name;
-
-        issuerByAddress[issuerAddress].name = name;
+    function getIssuerAddressesByNameAndVersions(
+        string memory name,
+        uint32[] memory version
+    ) public view returns (address[] memory) {
+        address[] memory result = new address[](version.length);
+        for (uint256 i = 0; i < version.length; i++) {
+            result[i] = issuerAddressByNameAndVersion[name][version[i]];
+        }
+        return result;
     }
 
     function listIssuersRecord(
