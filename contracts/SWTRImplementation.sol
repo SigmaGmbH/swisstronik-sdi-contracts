@@ -15,8 +15,8 @@ contract SWTRImplementation is OwnableUpgradeable {
     mapping(address => Issuer) public issuerByAddress;
     mapping(address => uint256) issuerIndex;
 
-    function initialize() public initializer {
-        __Ownable_init(msg.sender);
+    function initialize(address _initialOwner) public initializer {
+        __Ownable_init(_initialOwner);
     }
 
     function addIssuersRecord(

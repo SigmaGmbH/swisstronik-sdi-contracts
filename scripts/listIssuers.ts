@@ -5,7 +5,7 @@ async function main() {
   const [signer] = await ethers.getSigners();
   const contract = await ethers.getContractAt(
     "SWTRImplementation",
-    "0xC271c016cBdbbe19e5505a79aAD73e40F4654B3e"
+    "0xa7175e81b761793C848FEFE107E0F2475F50D57E" // proxy address
   );
 
   const issuerCount = (await readContractData(
