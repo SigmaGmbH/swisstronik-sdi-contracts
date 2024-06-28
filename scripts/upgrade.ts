@@ -21,10 +21,9 @@ async function main() {
   let tx: TransactionResponse = await sendShieldedTransaction(
     signer,
     proxyAdmin.target as string,
-    proxyAdmin.interface.encodeFunctionData("upgradeToAndCall", [
+    proxyAdmin.interface.encodeFunctionData("upgradeTo", [
       SWTRProxy.target as string, //proxy address
       SWTRImplementation.target as string, // implementation address
-      "0x", // data
     ]),
     "0"
   );
