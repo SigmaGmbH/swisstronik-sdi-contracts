@@ -70,6 +70,7 @@ contract SWTRImplementation is OwnableUpgradeable {
 
         delete issuerByAddress[issuerAddress];
         delete issuerIndex[issuerAddress];
+        delete issuerAddressByNameAndVersion[name][version];
     }
 
     function getIssuerAddressesByNameAndVersions(
