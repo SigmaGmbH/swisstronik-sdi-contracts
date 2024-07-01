@@ -6,21 +6,18 @@ dotenv.config()
 
 const config: HardhatUserConfig = {
   solidity: "0.8.24",
-  networks: {
-    devnet: {
-      url: "http://148.113.17.32:8545",
-      accounts: [`0x` + `${process.env.PRIVATE_KEY}`],
-    },
+networks: {
     testnet: {
-      url: "https://json-rpc.testnet.swisstronik.com",
-      accounts: [`0x` + `${process.env.PRIVATE_KEY}`],
+        url: "https://json-rpc.testnet.swisstronik.com",
+        accounts:
+          process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
-  },
+},
   etherscan: {
     apiKey: `ANY_STRING_WILL_DO`,
     customChains: [
       {
-        network: "devnet",
+        network: "testnet",
         chainId: 1291,
         urls: {
           apiURL: "https://explorer-evm.testnet.swisstronik.com/api",
