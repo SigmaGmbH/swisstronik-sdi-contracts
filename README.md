@@ -47,3 +47,11 @@ It's designed for managing issuer records and verifying user compliance based on
 ## Deploy
 
 `npx hardhat run scripts/deploy.ts --network testnet`
+
+
+## Deployed Contracts
+
+| Contract   | Address                                    |
+|------------|--------------------------------------------|
+| ProxyAdmin | `0xe49de5cAC6aa19E70499D89D04E475a7CcDC58C1` |
+| SWTRProxy  | `0x7a838b0545513aC19920128Fdc8ECd25C9b1b1bD` |
