@@ -13,4 +13,16 @@ interface IComplianceBridge {
         address userAddress,
         address issuerAddress
     ) external returns (bytes memory);
+
+    function addVerificationDetails(
+        address userAddress,
+        string memory originChain,
+        uint32 verificationType,
+        uint32 issuanceTimestamp,
+        uint32 expirationTimestamp,
+        bytes memory proofData,
+        string memory schema,
+        string memory issuerVerificationId,
+        uint32 version
+    ) external;
 }
