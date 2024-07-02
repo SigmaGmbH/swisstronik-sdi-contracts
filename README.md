@@ -19,7 +19,8 @@ It's designed for managing issuer records and verifying user compliance based on
 
 - `addIssuersRecord(string[] memory name, uint32[] memory version, address[] memory issuerAddress)`: Adds multiple issuer records.
 - `removeIssuerRecord(string memory name, uint32 version)`: Removes an issuer record.
-- `function getIssuerAddressesByNameAndVersions(`: Get list of Issuer addresses by their name and versions
+- ` function getIssuerRecordByAddress(address issuerAddress)`: Gets the issuer record by its address.
+- `getIssuerAddressesByNameAndVersions(string memory name, uint32[] memory version)`: Get list of Issuer addresses by their name and versions
 - `updateIssuerRecord(address issuerAddress, string memory name)`: Updates the name of an issuer.
 - `listIssuersRecord(uint256 start, uint256 end)`: Lists issuer records within a specified range.
 - `issuerRecordCount()`: Returns the total number of issuer records.

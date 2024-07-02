@@ -4,14 +4,9 @@ pragma solidity ^0.8.24;
 import {IComplianceBridge} from "./IComplianceBridge.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {ISWTRProxy} from "./interfaces/ISWTRProxy.sol";
 
-contract SWTRImplementation is OwnableUpgradeable {
-    struct Issuer {
-        string name;
-        uint32 version;
-        address issuerAddress;
-    }
-
+contract SWTRImplementation is ISWTRProxy, OwnableUpgradeable {
     Issuer[] public issuers;
     mapping(address => Issuer) public issuerByAddress;
     mapping(address => uint256) issuerIndex;
@@ -73,6 +68,12 @@ contract SWTRImplementation is OwnableUpgradeable {
         delete issuerAddressByNameAndVersion[name][version];
     }
 
+    function getIssuerRecordByAddress(
+        address issuerAddress
+    ) public view returns (Issuer memory) {
+        return issuerByAddress[issuerAddress];
+    }
+
     function getIssuerAddressesByNameAndVersions(
         string memory name,
         uint32[] memory version
@@ -103,7 +104,7 @@ contract SWTRImplementation is OwnableUpgradeable {
 
     function isUserVerified(
         address userAddress,
-        IComplianceBridge.VerificationType verificationType
+        ISWTRProxy.VerificationType verificationType
     ) public view returns (bool) {
         address[] memory allowedIssuers;
         bytes memory payload = abi.encodeCall(
@@ -120,7 +121,7 @@ contract SWTRImplementation is OwnableUpgradeable {
 
     function isUserVerifiedBy(
         address userAddress,
-        IComplianceBridge.VerificationType verificationType,
+        ISWTRProxy.VerificationType verificationType,
         address[] memory allowedIssuers
     ) public view returns (bool) {
         bytes memory payload = abi.encodeCall(
@@ -138,18 +139,18 @@ contract SWTRImplementation is OwnableUpgradeable {
     function listVerificationData(
         address userAddress,
         address issuerAddress
-    ) public view returns (IComplianceBridge.VerificationData[] memory) {
+    ) public view returns (ISWTRProxy.VerificationData[] memory) {
         bytes memory payload = abi.encodeCall(
             IComplianceBridge.getVerificationData,
             (userAddress, issuerAddress)
         );
         (bool success, bytes memory data) = address(1028).staticcall(payload);
-        IComplianceBridge.VerificationData[] memory verificationData;
+        ISWTRProxy.VerificationData[] memory verificationData;
         if (success) {
             // Decode the bytes data into an array of structs
             verificationData = abi.decode(
                 data,
-                (IComplianceBridge.VerificationData[])
+                (ISWTRProxy.VerificationData[])
             );
         }
         return verificationData;
@@ -159,8 +160,8 @@ contract SWTRImplementation is OwnableUpgradeable {
         address userAddress,
         address issuerAddress,
         bytes memory verificationId
-    ) public view returns (IComplianceBridge.VerificationData memory) {
-        IComplianceBridge.VerificationData[]
+    ) public view returns (ISWTRProxy.VerificationData memory) {
+        ISWTRProxy.VerificationData[]
             memory verificationData = listVerificationData(
                 userAddress,
                 issuerAddress
@@ -185,9 +186,9 @@ contract SWTRImplementation is OwnableUpgradeable {
     function getVerificationCountry(
         address userAddress,
         address issuerAddress,
-        IComplianceBridge.VerificationType verificationType
+        ISWTRProxy.VerificationType verificationType
     ) public view returns (string memory) {
-        IComplianceBridge.VerificationData[]
+        ISWTRProxy.VerificationData[]
             memory verificationData = listVerificationData(
                 userAddress,
                 issuerAddress
@@ -257,9 +258,9 @@ contract SWTRImplementation is OwnableUpgradeable {
     function passedVerificationType(
         address userAddress,
         address issuerAddress,
-        IComplianceBridge.VerificationType verificationType
+        ISWTRProxy.VerificationType verificationType
     ) public view returns (bool) {
-        IComplianceBridge.VerificationData[]
+        ISWTRProxy.VerificationData[]
             memory verificationData = listVerificationData(
                 userAddress,
                 issuerAddress
@@ -286,7 +287,7 @@ contract SWTRImplementation is OwnableUpgradeable {
             passedVerificationType(
                 userAddress,
                 issuerAddress,
-                IComplianceBridge.VerificationType.VT_HUMANITY
+                ISWTRProxy.VerificationType.VT_HUMANITY
             );
     }
 
@@ -298,7 +299,7 @@ contract SWTRImplementation is OwnableUpgradeable {
             passedVerificationType(
                 userAddress,
                 issuerAddress,
-                IComplianceBridge.VerificationType.VT_AML
+                ISWTRProxy.VerificationType.VT_AML
             );
     }
 }
