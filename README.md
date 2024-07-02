@@ -54,5 +54,5 @@ It's designed for managing issuer records and verifying user compliance based on
 
 | Contract   | Address                                    |
 |------------|--------------------------------------------|
-| ProxyAdmin | `0xe49de5cAC6aa19E70499D89D04E475a7CcDC58C1` |
-| SWTRProxy  | `0x7a838b0545513aC19920128Fdc8ECd25C9b1b1bD` |
+| ProxyAdmin | `0x96e3ba5a33d21f64E5504Fd964656d1535a87F7e` |
+| SWTRProxy  | `0xBF896E5616d12fE6Bd7a376D2DBb924ff531CFDF` |

@@ -6,12 +6,12 @@ async function main() {
 
   const SWTRProxy = await ethers.getContractAt(
     "SWTRProxy",
-    "0x7a838b0545513aC19920128Fdc8ECd25C9b1b1bD" // proxy address
+    "0xBF896E5616d12fE6Bd7a376D2DBb924ff531CFDF" // proxy address
   );
 
   const proxyAdmin = await ethers.getContractAt(
     "ProxyAdmin",
-    "0xe49de5cAC6aa19E70499D89D04E475a7CcDC58C1" // proxy admin address
+    "0x96e3ba5a33d21f64E5504Fd964656d1535a87F7e" // proxy admin address
   );
 
   const implementation = (
