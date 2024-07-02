@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
 
-import {IComplianceBridge} from "./IComplianceBridge.sol";
+import {IComplianceBridge} from "./interfaces/IComplianceBridge.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {ISWTRProxy} from "./interfaces/ISWTRProxy.sol";
