@@ -2,7 +2,7 @@ name: Build & Test
 
 on:
   push:
-    branches: [master, develop, "feat/*"]
+    branches: [main, develop, "feat/*"]
     paths-ignore:
       - "README.md"
       - "LICENSE"
