@@ -1,6 +1,6 @@
 {
   "name": "@swisstronik/sdi-contracts",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Swisstronik SDI contracts",
   "homepage": "https://github.com/SigmaGmbH/swisstronik-sdi-contracts",
   "bugs": {
@@ -27,7 +27,7 @@
     "@types/node": "^20.12.7"
   },
   "scripts": {
-    "hardhat:compile": "hardhat compile --force",
+    "build": "hardhat compile --force",
     "hardhat:deploy": "hardhat run scripts/deploy.ts --network testnet",
     "test": "hardhat test"
   }
