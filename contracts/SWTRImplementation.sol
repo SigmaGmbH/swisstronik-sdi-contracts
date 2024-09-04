@@ -266,8 +266,6 @@ contract SWTRImplementation is ISWTRProxy, OwnableUpgradeable {
                 issuerAddress
             );
 
-        require(verificationData.length > 0, "No verification data found");
-
         for (uint256 i = 0; i < verificationData.length; i++) {
             if (
                 verificationData[i].verificationType == uint32(verificationType)
