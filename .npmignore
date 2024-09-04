@@ -21,3 +21,6 @@ logs/
 test/
 scripts/
 .idea/
+
+artifacts/
+cache/
