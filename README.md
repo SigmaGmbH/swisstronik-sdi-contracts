@@ -15,7 +15,7 @@ It's designed for managing issuer records and verifying user compliance based on
 
 ## Integration
 
-In your solidty repository, run `npm i @swisstronik/sdi-contracts`
+In your solidity repository, run `npm i @swisstronik/sdi-contracts`
 
 ```solidity
 
