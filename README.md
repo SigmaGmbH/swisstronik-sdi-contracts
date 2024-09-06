@@ -13,6 +13,32 @@ It's designed for managing issuer records and verifying user compliance based on
 - **Data Retrieval**: List issuer records and verification data for users.
 - **Upgradeability**: Utilizes OpenZeppelin's upgradeable contracts for future improvements without losing state.
 
+## Integration
+
+In your solidity repository, run `npm i @swisstronik/sdi-contracts`
+
+```solidity
+
+pragma solidity ^0.8.24;
+
+import {ISWTRProxy} from "@swisstronik/sdi-contracts/contracts/interfaces/ISWTRProxy.sol";
+
+contract Sample {
+    ISWTRProxy public swtrProxy;
+    
+    constructor(ISWTRProxy _swtrProxy) { swtrProxy = _swtrProxy; }
+
+    function isUserVerified(
+        address user,
+        ISWTRProxy.VerificationType verificationType
+    ) public view returns (bool) {
+      return swtrProxy.isUserVerified(user, verificationType);
+    }
+
+}
+```
+
+
 ## Functions
 
 ### Issuer Management
