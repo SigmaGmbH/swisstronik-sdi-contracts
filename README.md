@@ -15,7 +15,7 @@ It's designed for managing issuer records and verifying user compliance based on
 
 ## Integration
 
-Run `npm i @swisstronik/sdi-contracts`
+In your solidty repository, run `npm i @swisstronik/sdi-contracts`
 
 ```solidity
 
@@ -28,8 +28,20 @@ contract Sample {
     
     constructor(ISWTRProxy _swtrProxy) { swtrProxy = _swtrProxy; }
 
+    function isUserVerified(
+        address user,
+        ISWTRProxy.VerificationType verificationType
+    ) public view returns (bool) {
+      return
+          swtrProxy.isUserVerified(
+              user, //user address
+              verificationType
+          );
+    }
+
 }
 ```
+
 
 ## Functions
 
