@@ -32,7 +32,7 @@ contract Sample {
         address user,
         ISWTRProxy.VerificationType verificationType
     ) public view returns (bool) {
-      return swtrProxy.isUserVerified(user,verificationType);
+      return swtrProxy.isUserVerified(user, verificationType);
     }
 
 }
