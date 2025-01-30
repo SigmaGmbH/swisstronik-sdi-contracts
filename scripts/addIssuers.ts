@@ -13,14 +13,14 @@ async function main() {
 
   const issuersToAdd = [
     {
-      name: "Quadrata",
+      name: "Compilot",
       version: 1,
-      address: "0x971CD375a8799ca7F2366104e117C5497243C478",
+      address: "0xeF083cD5A653aB7B7FD746979676bc683b5f9012",
     },
     {
       name: "Worldcoin",
-      version: 1,
-      address: "0x5563712d4923E3220cF94D53dD2f9765969dBac3",
+      version: 2,
+      address: "0x32d024ab006564371648A1c3860524D24E3d7AE1",
     },
   ];
 
