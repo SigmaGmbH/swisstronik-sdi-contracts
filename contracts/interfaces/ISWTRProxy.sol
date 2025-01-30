@@ -112,6 +112,17 @@ interface ISWTRProxy {
             string memory verification_level
         );
 
+    function decodeCompilotV1OriginalData(
+        bytes memory originalData
+    )
+        external
+        pure
+        returns (
+            string memory riskScore,
+            uint32 createdAt,
+            string memory status
+        );
+
     function passedVerificationType(
         address userAddress,
         address issuerAddress,

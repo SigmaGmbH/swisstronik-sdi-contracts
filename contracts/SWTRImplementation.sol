@@ -9,7 +9,7 @@ import {ISWTRProxy} from "./interfaces/ISWTRProxy.sol";
 contract SWTRImplementation is ISWTRProxy, OwnableUpgradeable {
     Issuer[] public issuers;
     mapping(address => Issuer) public issuerByAddress;
-    mapping(address => uint256) issuerIndex;
+    mapping(address => uint256) public issuerIndex;
 
     mapping(string name => mapping(uint32 version => address))
         public issuerAddressByNameAndVersion;
@@ -29,10 +29,16 @@ contract SWTRImplementation is ISWTRProxy, OwnableUpgradeable {
             "Length mismatch"
         );
 
+
         for (uint256 i = 0; i < name.length; i++) {
+            require(issuerAddress[i] != address (0), "Issuer has zero address");
             require(
                 issuerByAddress[issuerAddress[i]].issuerAddress == address(0),
                 "Issuer already exists"
+            );
+            require(
+                issuerAddressByNameAndVersion[name[i]][version[i]] == address(0),
+                "Name+version already exists"
             );
             Issuer memory issuer = Issuer({
                 name: name[i],
@@ -59,8 +65,14 @@ contract SWTRImplementation is ISWTRProxy, OwnableUpgradeable {
             "Issuer does not exist"
         );
         uint256 index = issuerIndex[issuerAddress];
+        uint256 lastIndex = issuers.length - 1;
 
-        issuers[index] = issuers[issuers.length - 1];
+        if (index != lastIndex) {
+            Issuer memory lastIssuer = issuers[lastIndex];
+            issuers[index] = lastIssuer;
+            issuerIndex[lastIssuer.issuerAddress] = index;
+        }
+
         issuers.pop();
 
         delete issuerByAddress[issuerAddress];
@@ -170,12 +182,7 @@ contract SWTRImplementation is ISWTRProxy, OwnableUpgradeable {
         require(verificationData.length > 0, "No verification data found");
 
         for (uint256 i = 0; i < verificationData.length; i++) {
-            if (
-                Strings.equal(
-                    string(verificationData[i].verificationId),
-                    string(verificationId)
-                )
-            ) {
+            if (keccak256(verificationData[i].verificationId) == keccak256(verificationId)) {
                 return verificationData[i];
             }
         }
@@ -254,6 +261,21 @@ contract SWTRImplementation is ISWTRProxy, OwnableUpgradeable {
             (string, string, string, string)
         );
     }
+
+    function decodeCompilotV1OriginalData(
+        bytes memory originalData
+    )
+    public
+    pure
+    returns (
+        string memory riskScore,
+        uint32 createdAt,
+        string memory status
+    )
+    {
+        (riskScore, createdAt, status) = abi.decode(originalData, (string, uint32, string));
+    }
+
 
     function passedVerificationType(
         address userAddress,
