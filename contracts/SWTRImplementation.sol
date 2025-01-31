@@ -116,12 +116,13 @@ contract SWTRImplementation is ISWTRProxy, OwnableUpgradeable {
 
     function isUserVerified(
         address userAddress,
+        uint32 expirationTimestamp,
         ISWTRProxy.VerificationType verificationType
     ) public view returns (bool) {
         address[] memory allowedIssuers;
         bytes memory payload = abi.encodeCall(
             IComplianceBridge.hasVerification,
-            (userAddress, uint32(verificationType), 0, allowedIssuers)
+            (userAddress, uint32(verificationType), expirationTimestamp, allowedIssuers)
         );
         (bool success, bytes memory data) = address(1028).staticcall(payload);
         if (success) {
@@ -133,12 +134,13 @@ contract SWTRImplementation is ISWTRProxy, OwnableUpgradeable {
 
     function isUserVerifiedBy(
         address userAddress,
+        uint32 expirationTimestamp,
         ISWTRProxy.VerificationType verificationType,
         address[] memory allowedIssuers
     ) public view returns (bool) {
         bytes memory payload = abi.encodeCall(
             IComplianceBridge.hasVerification,
-            (userAddress, uint32(verificationType), 0, allowedIssuers)
+            (userAddress, uint32(verificationType), expirationTimestamp, allowedIssuers)
         );
         (bool success, bytes memory data) = address(1028).staticcall(payload);
         if (success) {

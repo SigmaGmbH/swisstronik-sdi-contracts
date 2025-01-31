@@ -61,11 +61,13 @@ interface ISWTRProxy {
 
     function isUserVerified(
         address userAddress,
+        uint32 expirationTimestamp,
         ISWTRProxy.VerificationType verificationType
     ) external view returns (bool);
 
     function isUserVerifiedBy(
         address userAddress,
+        uint32 expirationTimestamp,
         ISWTRProxy.VerificationType verificationType,
         address[] memory allowedIssuers
     ) external view returns (bool);

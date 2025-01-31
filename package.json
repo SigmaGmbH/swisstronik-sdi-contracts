@@ -16,19 +16,21 @@
      "url": "https://github.com/SigmaGmbH/swisstronik-sdi-contracts.git"
   },
   "dependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "@openzeppelin/contracts": "^5.0.2",
-    "@openzeppelin/contracts-upgradeable": "^5.0.2",
-    "@swisstronik/utils": "^1.2.1",
-    "dotenv": "^16.4.5",
-    "hardhat": "^2.20.1"
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.2.0",
+    "@openzeppelin/contracts-upgradeable": "^5.2.0",
+    "@swisstronik/utils": "^1.3.0",
+    "dotenv": "^16.4.7",
+    "hardhat": "^2.22.18"
   },
   "devDependencies": {
-    "@types/node": "^20.12.7"
+    "@types/node": "^22.12.0",
+    "solidity-coverage": "^0.8.14"
   },
   "scripts": {
     "build": "hardhat compile --force",
     "hardhat:deploy": "hardhat run scripts/deploy.ts --network testnet",
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "coverage": "hardhat coverage"
   }
 }
