@@ -278,6 +278,21 @@ contract SWTRImplementation is ISWTRProxy, OwnableUpgradeable {
         (riskScore, createdAt, status) = abi.decode(originalData, (string, uint32, string));
     }
 
+    function decodeZeronymV1OriginalData(
+        bytes memory originalData
+    )
+    public
+    pure
+    returns (
+        bool isFromUs,
+        uint256 actionId,
+        uint256 output1,
+        uint256 output2
+    )
+    {
+        (isFromUs, actionId, output1, output2) = abi.decode(originalData, (bool, uint256, uint256, uint256));
+    }
+
 
     function passedVerificationType(
         address userAddress,
