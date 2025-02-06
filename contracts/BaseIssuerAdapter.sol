@@ -11,8 +11,6 @@ contract BaseIssuerAdapter is Ownable, IssuerAdapter {
     // Event now includes the verificationId in addition to the user address.
     event UserVerified(address userAddress, bytes verificationId);
     event VerificationRevoked(address userAddress, bytes verificationId);
-    event CredentialConverted(bytes verificationId);
-
 
     function withdraw() external payable onlyOwner {
         uint256 balance = address(this).balance;
@@ -21,8 +19,6 @@ contract BaseIssuerAdapter is Ownable, IssuerAdapter {
         (bool success,) = owner().call{value: balance}("");
         require(success, "Withdrawal failed");
     }
-
-
 
     /**
      * @notice Unified function to mark a user as verified using a single struct of parameters.
@@ -33,7 +29,7 @@ contract BaseIssuerAdapter is Ownable, IssuerAdapter {
         VerificationParams memory params
     ) public onlyOwner returns (bytes memory verificationId) {
         // Compute the issuance timestamp based on current block time.
-        uint32 issuanceTimestamp = uint32(block.timestamp % 2**32);
+        uint32 issuanceTimestamp = uint32(block.timestamp % 2 ** 32);
         bytes memory payload;
         if (params.publicKey == bytes32(0)) {
             // Call the V1 addVerificationDetails method.
@@ -77,7 +73,6 @@ contract BaseIssuerAdapter is Ownable, IssuerAdapter {
         return verificationId;
     }
 
-
     /**
      * @notice Revokes a verification.
      * @param userAddress The address of the user whose verification is to be revoked.
@@ -93,23 +88,9 @@ contract BaseIssuerAdapter is Ownable, IssuerAdapter {
         emit VerificationRevoked(userAddress, verificationId);
     }
 
-    /**
-     * @notice Converts a credential by calling the ComplianceBridge.
-     * @param verificationId The verification id to convert.
-     * @param publicKey The public key to include in the conversion.
-     */
-    function convertCredential(bytes memory verificationId, bytes32 publicKey) public {
-        bytes memory payload = abi.encodeCall(
-            IComplianceBridge.convertCredential,
-            (verificationId, abi.encodePacked(publicKey))
-        );
-        (bool success, bytes memory data) = address(1028).call(payload);
-        require(success, string(abi.encodePacked("Convert credential failed: ", data)));
-        emit CredentialConverted(verificationId);
-    }
 
 
-    function getSupportedTypes() external pure returns (ISWTRProxy.VerificationType[] memory) {
+    function getSupportedTypes() external public pure returns (ISWTRProxy.VerificationType[] memory) {
         ISWTRProxy.VerificationType[] memory types;
         return types;
     }

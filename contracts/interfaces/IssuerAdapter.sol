@@ -20,5 +20,4 @@ interface IssuerAdapter {
     function getSupportedTypes() external pure returns (ISWTRProxy.VerificationType[] memory);
     function markAsVerified(VerificationParams memory params) external returns (bytes memory);
     function revokeVerification(address userAddress, bytes memory verificationId) external;
-    function convertCredential(bytes memory verificationId, bytes32 publicKey) external;
 }
