@@ -7,6 +7,62 @@ contract MockComplianceBridge is IComplianceBridge {
     mapping(address => mapping(uint32 => bool)) private verificationStatus;
     mapping(address => mapping(address => bool)) private issuerVerificationStatus;
     mapping(address => mapping(address => ISWTRProxy.VerificationData[])) private userVerificationData;
+    mapping(address => address[]) private userIssuers;
+    mapping(bytes32 => bool) private revokedVerifications;
+
+    bytes32 public issuanceTreeRoot;
+    bytes32 public revocationTreeRoot;
+
+    /// @dev Returns true if the given issuer is already recorded for this user.
+    function _containsIssuer(address user, address issuer) internal view returns (bool) {
+        address[] storage issuers = userIssuers[user];
+        for (uint i = 0; i < issuers.length; i++) {
+            if (issuers[i] == issuer) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// @dev Internal helper that stores a verification record.
+    function _storeVerification(
+        address userAddress,
+        uint32 verificationType,
+        bytes32 verificationId,
+        string memory originChain,
+        uint32 issuanceTimestamp,
+        uint32 expirationTimestamp,
+        bytes memory proofData,
+        string memory schema,
+        string memory issuerVerificationId,
+        uint32 version
+    ) internal {
+        // Push the new verification data into storage.
+        userVerificationData[userAddress][msg.sender].push(
+            ISWTRProxy.VerificationData({
+                verificationType: verificationType,
+                verificationId: abi.encodePacked(verificationId),
+                issuerAddress: msg.sender,
+                originChain: originChain,
+                issuanceTimestamp: issuanceTimestamp,
+                expirationTimestamp: expirationTimestamp,
+                originalData: proofData,
+                schema: schema,
+                issuerVerificationId: issuerVerificationId,
+                version: version
+            })
+        );
+        // Mark the issuer as having verified this user.
+        issuerVerificationStatus[userAddress][msg.sender] = true;
+        // Record the issuer if not already in the list.
+        if (!_containsIssuer(userAddress, msg.sender)) {
+            userIssuers[userAddress].push(msg.sender);
+        }
+        // Update the verification status for the given type.
+        verificationStatus[userAddress][verificationType] = true;
+        // Update the issuance tree root in a dummy manner.
+        issuanceTreeRoot = keccak256(abi.encodePacked(issuanceTreeRoot, verificationId));
+    }
 
     function setVerificationStatus(address user, uint32 verificationType, bool status) external {
         verificationStatus[user][verificationType] = status;
@@ -27,7 +83,6 @@ contract MockComplianceBridge is IComplianceBridge {
         }
     }
 
-    /// @notice Adds verification details and returns a dummy bytes response.
     function addVerificationDetails(
         address userAddress,
         string memory originChain,
@@ -39,12 +94,25 @@ contract MockComplianceBridge is IComplianceBridge {
         string memory issuerVerificationId,
         uint32 version
     ) external override returns (bytes memory) {
-        // In a real implementation you would store and process the provided data.
-        // For this mock we simply return a dummy response.
-        return abi.encode("addVerificationDetails: dummy response");
+        // Generate a unique verificationId.
+        bytes32 verificationId = keccak256(
+            abi.encodePacked(userAddress, msg.sender, block.timestamp, originChain, verificationType)
+        );
+        _storeVerification(
+            userAddress,
+            verificationType,
+            verificationId,
+            originChain,
+            issuanceTimestamp,
+            expirationTimestamp,
+            proofData,
+            schema,
+            issuerVerificationId,
+            version
+        );
+        return abi.encodePacked(verificationId);
     }
 
-    /// @notice Adds verification details (version 2) and returns a dummy bytes response.
     function addVerificationDetailsV2(
         address userAddress,
         string memory originChain,
@@ -57,23 +125,61 @@ contract MockComplianceBridge is IComplianceBridge {
         uint32 version,
         bytes32 publicKey
     ) external override returns (bytes memory) {
-        // Dummy implementation returning a simple encoded string.
-        return abi.encode("addVerificationDetailsV2: dummy response");
+        // Generate a unique verificationId.
+        bytes32 verificationId = keccak256(
+            abi.encodePacked(userAddress, msg.sender, block.timestamp, originChain, verificationType)
+        );
+        // Combine proofData with the publicKey for version 2.
+        bytes memory combinedData = abi.encodePacked(proofData, publicKey);
+        _storeVerification(
+            userAddress,
+            verificationType,
+            verificationId,
+            originChain,
+            issuanceTimestamp,
+            expirationTimestamp,
+            combinedData,
+            schema,
+            issuerVerificationId,
+            version
+        );
+        return abi.encodePacked(verificationId);
     }
 
-    /// @notice Checks whether the user has a given verification.
     function hasVerification(
         address userAddress,
         uint32 verificationType,
         uint32 expirationTimestamp,
         address[] memory allowedIssuers
     ) external view override returns (bool) {
-        if (allowedIssuers.length == 0) {
-            return verificationStatus[userAddress][verificationType];
-        }
-        for (uint i = 0; i < allowedIssuers.length; i++) {
-            if (issuerVerificationStatus[userAddress][allowedIssuers[i]]) {
+        // First, if allowed issuers are provided, check if any of those issuers marked the user as verified.
+        if (allowedIssuers.length > 0) {
+            for (uint i = 0; i < allowedIssuers.length; i++) {
+                if (issuerVerificationStatus[userAddress][allowedIssuers[i]]) {
+                    return true;
+                }
+            }
+        } else {
+            // If no allowed issuers are provided, check the general verification flag.
+            if (verificationStatus[userAddress][verificationType]) {
                 return true;
+            }
+        }
+        // Next, check stored verification records if any exist.
+        // If allowedIssuers array is empty, use the list of issuers recorded for this user.
+        address[] memory issuers = allowedIssuers.length == 0 ? userIssuers[userAddress] : allowedIssuers;
+        for (uint i = 0; i < issuers.length; i++) {
+            ISWTRProxy.VerificationData[] storage verifications = userVerificationData[userAddress][issuers[i]];
+            for (uint j = 0; j < verifications.length; j++) {
+                if (verifications[j].verificationType == verificationType) {
+                    // If an expiration timestamp is provided, check that the stored record's expiration is not earlier.
+                    if (expirationTimestamp == 0 || verifications[j].expirationTimestamp >= expirationTimestamp) {
+                        bytes32 vIdHash = keccak256(verifications[j].verificationId);
+                        if (!revokedVerifications[vIdHash]) {
+                            return true;
+                        }
+                    }
+                }
             }
         }
         return false;
@@ -84,12 +190,10 @@ contract MockComplianceBridge is IComplianceBridge {
         address issuerAddress
     ) external view override returns (bytes memory) {
         ISWTRProxy.VerificationData[] storage storedData = userVerificationData[userAddress][issuerAddress];
-
         if (storedData.length == 0) {
             bytes[] memory emptyEncodedTuples = new bytes[](0);
             return abi.encode(emptyEncodedTuples);
         }
-
         bytes[] memory encodedTuples = new bytes[](storedData.length);
         for (uint i = 0; i < storedData.length; i++) {
             encodedTuples[i] = abi.encode(
@@ -108,30 +212,25 @@ contract MockComplianceBridge is IComplianceBridge {
         return abi.encode(encodedTuples);
     }
 
-    /// @notice Returns a dummy revocation tree root.
     function getRevocationTreeRoot() external override returns (bytes memory) {
-        // In a real scenario, this would return the current revocation tree root.
-        return abi.encode("revocationTreeRoot: dummy");
+        return abi.encode(revocationTreeRoot);
     }
 
-    /// @notice Returns a dummy issuance tree root.
     function getIssuanceTreeRoot() external override returns (bytes memory) {
-        // In a real scenario, this would return the current issuance tree root.
-        return abi.encode("issuanceTreeRoot: dummy");
+        return abi.encode(issuanceTreeRoot);
     }
 
-    /// @notice Revokes a verification.
     function revokeVerification(bytes memory verificationId) external override {
-        // In a real implementation, this would mark a verification as revoked.
-        // For the mock, the function accepts the call without performing any operation.
+        bytes32 vIdHash = keccak256(verificationId);
+        revokedVerifications[vIdHash] = true;
+        // Update the revocation tree root in a dummy way.
+        revocationTreeRoot = keccak256(abi.encodePacked(revocationTreeRoot, verificationId));
     }
 
-    /// @notice Converts a credential and returns a dummy conversion.
     function convertCredential(
         bytes memory verificationId,
         bytes memory publicKey
     ) external override returns (bytes memory) {
-        // Dummy implementation: simply concatenates the two byte arrays.
         return abi.encodePacked(verificationId, publicKey);
     }
 }
