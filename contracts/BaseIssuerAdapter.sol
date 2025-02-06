@@ -90,7 +90,7 @@ contract BaseIssuerAdapter is Ownable, IssuerAdapter {
 
 
 
-    function getSupportedTypes() external public pure returns (ISWTRProxy.VerificationType[] memory) {
+    function getSupportedTypes() public pure returns (ISWTRProxy.VerificationType[] memory) {
         ISWTRProxy.VerificationType[] memory types;
         return types;
     }
