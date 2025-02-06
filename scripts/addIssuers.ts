@@ -13,15 +13,15 @@ async function main() {
 
   const issuersToAdd = [
     {
-      name: "Compilot",
+      name: "Zeronym",
       version: 1,
-      address: "0xeF083cD5A653aB7B7FD746979676bc683b5f9012",
+      address: "0x7Ff152c20426D3Ab198FF6408B079dE7168C785C",
     },
-    {
-      name: "Worldcoin",
-      version: 2,
-      address: "0x32d024ab006564371648A1c3860524D24E3d7AE1",
-    },
+    // {
+    //   name: "Worldcoin",
+    //   version: 2,
+    //   address: "0x32d024ab006564371648A1c3860524D24E3d7AE1",
+    // },
   ];
 
   let tx: TransactionResponse = await sendShieldedTransaction(

@@ -11,7 +11,8 @@ It's designed for managing issuer records and verifying user compliance based on
 - **Issuer Management**: Add, update, and remove issuer records securely.
 - **User Verification**: Verify users based on compliance criteria such as AML (Anti-Money Laundering) checks and humanity verification.
 - **Data Retrieval**: List issuer records and verification data for users.
-- **Upgradeability**: Utilizes OpenZeppelin's upgradeable contracts for future improvements without losing state.
+- **Data Decoding**: Decode original data formats for various verification systems (Quadrata Passport V1, Worldcoin V1, Compilot V1, Zeronym V1).
+- **Upgradeability**: Utilize OpenZeppelin's upgradeable contract patterns to allow future improvements without state loss.
 
 ## Integration
 
@@ -32,7 +33,8 @@ contract Sample {
         address user,
         ISWTRProxy.VerificationType verificationType
     ) public view returns (bool) {
-      return swtrProxy.isUserVerified(user, verificationType);
+        // Example call; expirationTimestamp set to 0 if not used.
+        return swtrProxy.isUserVerified(user, 0, verificationType);
     }
 
 }
@@ -45,7 +47,7 @@ contract Sample {
 
 - `addIssuersRecord(string[] memory name, uint32[] memory version, address[] memory issuerAddress)`: Adds multiple issuer records.
 - `removeIssuerRecord(string memory name, uint32 version)`: Removes an issuer record.
-- ` function getIssuerRecordByAddress(address issuerAddress)`: Gets the issuer record by its address.
+- `getIssuerRecordByAddress(address issuerAddress)`: Gets the issuer record by its address.
 - `getIssuerAddressesByNameAndVersions(string memory name, uint32[] memory version)`: Get list of Issuer addresses by their name and versions
 - `updateIssuerRecord(address issuerAddress, string memory name)`: Updates the name of an issuer.
 - `listIssuersRecord(uint256 start, uint256 end)`: Lists issuer records within a specified range.
@@ -63,9 +65,45 @@ contract Sample {
 - `walletPassedAML(address userAddress, address issuerAddress)`: Checks if a user's wallet has passed AML checks.
 
 ### Data Decoding
+#### decodeQuadrataPassportV1OriginalData(bytes memory originalData)
 
-- `decodeQuadrataPassportV1OriginalData(bytes memory originalData)`: Decodes data for Quadrata Passport V1.
-- `decodeWorldcoinV1OriginalData(bytes memory originalData)`: Decodes data for Worldcoin V1.
+Decodes original data for Quadrata Passport V1 verification.
+
+Returns:
+- `uint8 aml`: AML score or status.
+- `string country`: The country extracted from the data.
+- `string did`: The decentralized identifier.
+- `bool isBusiness`: Indicates if the entity is a business.
+- `bool investorStatus`: Indicates the investor status.
+
+#### decodeWorldcoinV1OriginalData(bytes memory originalData)
+
+Decodes original data for Worldcoin V1 verification.
+
+Returns:
+- `string merkle_root`: The Merkle root.
+- `string nullifier_hash`: The nullifier hash.
+- `string proof`: The cryptographic proof.
+- `string verification_level`: The verification level.
+
+#### decodeCompilotV1OriginalData(bytes memory originalData)
+
+Decodes original data for Compilot V1 verification.
+
+Returns:
+- `string riskScore`: The risk score.
+- `uint32 createdAt`: The Unix timestamp when the record was created.
+- `string status`: The status of the verification.
+
+#### decodeZeronymV1OriginalData(bytes memory originalData)
+
+Decodes original data for Zeronym V1 verification.
+
+Returns:
+- `bool isFromUs`: Indicates whether the user 
+- `uint256 actionId`: An action identifier.
+- `uint256 output1`: The first output value.
+- `uint256 output2`: The second output value.
 
 ## Build
 
