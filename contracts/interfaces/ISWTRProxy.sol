@@ -2,6 +2,9 @@
 pragma solidity ^0.8.24;
 
 interface ISWTRProxy {
+
+    error PrecompileError(bytes _data);
+
     struct VerificationData {
         // Verification type
         uint32 verificationType;
@@ -26,15 +29,16 @@ interface ISWTRProxy {
     }
 
     enum VerificationType {
-        VT_UNSPECIFIED, // VT_UNSPECIFIED defines an invalid/undefined verification type.
-        VT_KYC, // Know Your Custom
-        VT_KYB, // Know Your Business
-        VT_KYW, // Know Your Wallet
-        VT_HUMANITY, // Check humanity
-        VT_AML, // Anti Money Laundering (check transactions)
-        VT_ADDRESS,
-        VT_CUSTOM,
-        VT_CREDIT_SCORE
+        VT_UNSPECIFIED, // 0: defines an invalid/undefined verification type.
+        VT_KYC, // 1: Know Your Customer
+        VT_KYB, // 2: Know Your Business
+        VT_KYW, // 3: Know Your Wallet
+        VT_HUMANITY, // 4: Check humanity
+        VT_AML, // 5: Anti Money Laundering (check transactions)
+        VT_ADDRESS, // 6: Proof of Address
+        VT_CUSTOM, // 7: Custom
+        VT_CREDIT_SCORE, // 8: Credit Score
+        VT_BIOMETRIC // 9: Biometric Passports and other types of biometric verification
     }
 
     struct Issuer {
@@ -82,6 +86,11 @@ interface ISWTRProxy {
         address issuerAddress,
         bytes memory verificationId
     ) external view returns (ISWTRProxy.VerificationData memory);
+
+    function getIssuanceRoot() external view returns (uint256 _root);
+
+    function getRevocationRoot() external view returns (uint256 _root);
+
 
     function getVerificationCountry(
         address userAddress,

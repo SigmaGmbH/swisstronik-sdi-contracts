@@ -192,6 +192,26 @@ contract SWTRImplementation is ISWTRProxy, OwnableUpgradeable {
         revert("Verification not found");
     }
 
+    function getIssuanceRoot() public view  returns (uint256 _root) {
+        bytes memory payload = abi.encodeCall(IComplianceBridge.getIssuanceTreeRoot, ());
+        (bool success, bytes memory data) = address(1028).staticcall(payload);
+        if (!success) {
+            revert PrecompileError({_data: data});
+        }
+
+        (_root) = abi.decode(data, (uint256));
+    }
+
+    function getRevocationRoot() public view  returns (uint256 _root) {
+        bytes memory payload = abi.encodeCall(IComplianceBridge.getRevocationTreeRoot, ());
+        (bool success, bytes memory data) = address(1028).staticcall(payload);
+        if (!success) {
+            revert PrecompileError({_data: data});
+        }
+
+        (_root) = abi.decode(data, (uint256));
+    }
+
     function getVerificationCountry(
         address userAddress,
         address issuerAddress,

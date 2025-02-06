@@ -1,6 +1,6 @@
 {
   "name": "@swisstronik/sdi-contracts",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Swisstronik SDI contracts",
   "homepage": "https://github.com/SigmaGmbH/swisstronik-sdi-contracts",
   "bugs": {
