@@ -1,9 +1,9 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, upgrades } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import { TestIssuerAdapter } from "../typechain-types";
 
 const BRIDGE_ADDRESS = "0x0000000000000000000000000000000000000404";
-
 
 const verificationTypes = {
   VT_UNSPECIFIED: 0,
@@ -32,9 +32,16 @@ describe("BaseIssuerAdapter", function () {
     // Now we can interact with the mock at the bridge address
     const mockAt1028 = MockBridge.attach(BRIDGE_ADDRESS) as any;
 
-    // Deploy TestIssuerAdapter
+    // Deploy TestIssuerAdapter as upgradeable contract
     const TestAdapter = await ethers.getContractFactory("TestIssuerAdapter");
-    const adapter = await TestAdapter.deploy();
+    const adapter = await upgrades.deployProxy(TestAdapter, [owner.address], {
+      initializer: 'initialize',
+      kind: 'uups',
+      unsafeAllow: ['constructor', 'delegatecall']
+    }) as unknown as TestIssuerAdapter;
+
+    // Confirm deployment and initialization
+    await adapter.waitForDeployment();
 
     return {
       adapter,
@@ -114,27 +121,6 @@ describe("BaseIssuerAdapter", function () {
         adapter.connect(user1).markAsVerified(verificationParams)
       ).to.be.revertedWithCustomError(adapter, "OwnableUnauthorizedAccount");
     });
-
-    // it("Should fail if bridge call fails", async function () {
-    //   const { adapter, owner, user1 } = await loadFixture(deployAdapterFixture);
-    //
-    //   // Use invalid verification type to trigger failure
-    //   const verificationParams = {
-    //     userAddress: user1.address,
-    //     id: "verification123",
-    //     proofData: "0x1234",
-    //     expirationTimestamp: Math.floor(Date.now() / 1000) + 3600,
-    //     verificationType: 0, // Invalid verification type
-    //     publicKey: ethers.ZeroHash,
-    //     originChain: "ethereum",
-    //     schema: "standard-kyc-v1",
-    //     version: 1
-    //   };
-    //
-    //   await expect(
-    //     adapter.connect(owner).markAsVerified(verificationParams)
-    //   ).to.be.revertedWith("Verification failed");
-    // });
   });
 
   describe("revokeVerification", function () {
@@ -163,8 +149,6 @@ describe("BaseIssuerAdapter", function () {
       );
       const verificationId: any = verifiedEvent?.data;
 
-
-
       // Now revoke the verification
       const revokeTx = await adapter.connect(owner).revokeVerification(user1.address, verificationId);
       const revokeReceipt = await revokeTx.wait();
@@ -189,15 +173,6 @@ describe("BaseIssuerAdapter", function () {
         adapter.connect(user1).revokeVerification(user2.address, "0x1234")
       ).to.be.revertedWithCustomError(adapter, "OwnableUnauthorizedAccount");
     });
-
-    // it("Should fail if bridge revocation call fails", async function () {
-    //   const { adapter, owner, user1 } = await loadFixture(deployAdapterFixture);
-    //
-    //   // Try to revoke with invalid verification ID
-    //   await expect(
-    //     adapter.connect(owner).revokeVerification(user1.address, "0x")
-    //   ).to.be.revertedWith("Revoke verification failed");
-    // });
   });
 
   describe("withdraw", function () {
@@ -206,7 +181,7 @@ describe("BaseIssuerAdapter", function () {
 
       // Send some ETH to the adapter
       await user1.sendTransaction({
-        to: adapter.target,
+        to: await adapter.getAddress(),
         value: ethers.parseEther("1.0")
       });
 
@@ -232,6 +207,92 @@ describe("BaseIssuerAdapter", function () {
       await expect(
         adapter.connect(owner).withdraw()
       ).to.be.revertedWith("No ether to withdraw");
+    });
+  });
+
+  describe("Cost functionality", function() {
+    it("Should allow owner to set cost and payment token", async function() {
+      const { adapter, owner } = await loadFixture(deployAdapterFixture);
+
+      const cost = ethers.parseEther("0.1");
+      const paymentToken = "0x1234567890123456789012345678901234567890";
+
+      const tx = await adapter.connect(owner).setCost(cost, paymentToken);
+      const receipt = await tx.wait();
+
+      // Check event emission
+      const event = receipt?.logs.find(
+        log => log.topics[0] === adapter.interface.getEvent("CostUpdated")?.topicHash
+      );
+      expect(event).to.not.be.undefined;
+
+      // Check values were updated
+      const storedCost = await adapter.getCost();
+      const storedToken = await adapter.paymentToken();
+
+      expect(storedCost).to.equal(cost);
+      expect(storedToken).to.equal(paymentToken);
+    });
+
+    it("Should prevent non-owners from setting cost", async function() {
+      const { adapter, user1 } = await loadFixture(deployAdapterFixture);
+
+      await expect(
+        adapter.connect(user1).setCost(ethers.parseEther("0.1"), ethers.ZeroAddress)
+      ).to.be.revertedWithCustomError(adapter, "OwnableUnauthorizedAccount");
+    });
+
+    it("Should return zero as default cost", async function() {
+      const { adapter } = await loadFixture(deployAdapterFixture);
+
+      const cost = await adapter.getCost();
+      expect(cost).to.equal(0);
+    });
+
+    it("Should return zero address as default payment token", async function() {
+      const { adapter } = await loadFixture(deployAdapterFixture);
+
+      const token = await adapter.paymentToken();
+      expect(token).to.equal(ethers.ZeroAddress);
+    });
+  });
+
+  describe("Upgrade functionality", function() {
+    it("Should allow owner to upgrade implementation", async function() {
+      const { adapter, owner } = await loadFixture(deployAdapterFixture);
+
+      // Deploy a new implementation
+      const TestAdapterV2 = await ethers.getContractFactory("TestIssuerAdapter");
+      const upgradedAdapter = await upgrades.upgradeProxy(await adapter.getAddress(), TestAdapterV2, {
+        kind: 'uups',
+        unsafeAllow: ['constructor', 'delegatecall']
+      });
+
+      // Test that the instance is working
+      const storedCost = await upgradedAdapter.getCost();
+      expect(storedCost).to.equal(0);
+    });
+
+    describe("getSupportedTypes", function() {
+      it("Should return empty array for base implementation", async function() {
+        const { adapter } = await loadFixture(deployAdapterFixture);
+
+        const supportedTypes = await adapter.getSupportedTypes();
+
+        // The base implementation returns an empty array
+        expect(supportedTypes).to.be.an('array').that.is.empty;
+      });
+    });
+
+    it("Should prevent non-owners from upgrading implementation", async function() {
+      const { adapter, user1 } = await loadFixture(deployAdapterFixture);
+
+      const adapterConnectedToUser1 = adapter.connect(user1);
+
+      // Try to directly call the _authorizeUpgrade function, which should fail
+      await expect(
+        adapterConnectedToUser1.upgradeToAndCall(ethers.ZeroAddress, "0x")
+      ).to.be.revertedWithCustomError(adapter, "OwnableUnauthorizedAccount");
     });
   });
 });

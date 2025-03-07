@@ -2,11 +2,39 @@ pragma solidity ^0.8.24;
 
 import {ISWTRProxy} from "./interfaces/ISWTRProxy.sol";
 import {IComplianceBridge} from "./interfaces/IComplianceBridge.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {IssuerAdapter} from "./interfaces/IssuerAdapter.sol";
 
-contract BaseIssuerAdapter is Ownable, IssuerAdapter {
-    constructor() Ownable(msg.sender) {}
+contract BaseIssuerAdapter is Initializable, OwnableUpgradeable, UUPSUpgradeable, IssuerAdapter {
+    // cost value (could be in wei if native currency, or token smallest unit)
+    uint256 private cost;
+    // If paymentToken is address(0), then the cost is in native currency;
+    // otherwise, it represents an ERC-20 token address.
+    address public paymentToken;
+
+    // Emitted when cost or payment token is updated
+    event CostUpdated(uint256 newCost, address paymentToken);
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address initialOwner) public initializer {
+        __Ownable_init(initialOwner);
+        __UUPSUpgradeable_init();
+
+        cost = 0;
+        paymentToken = address(0);
+    }
+
+    function _authorizeUpgrade(address newImplementation)
+    internal
+    override
+    onlyOwner
+    {}
 
     // Event now includes the verificationId in addition to the user address.
     event UserVerified(address userAddress, bytes verificationId);
@@ -89,9 +117,24 @@ contract BaseIssuerAdapter is Ownable, IssuerAdapter {
     }
 
 
-
     function getSupportedTypes() external virtual pure returns (ISWTRProxy.VerificationType[] memory) {
         ISWTRProxy.VerificationType[] memory types;
         return types;
+    }
+
+    /// @notice Allows the owner to update the cost and payment token.
+    /// @param _cost The new cost value.
+    /// @param _paymentToken The new payment token address.
+    /// If using native currency, set this to address(0).
+    function setCost(uint256 _cost, address _paymentToken) external onlyOwner {
+        cost = _cost;
+        paymentToken = _paymentToken;
+        emit CostUpdated(_cost, _paymentToken);
+    }
+
+    /// @notice Returns the current cost.
+    /// @return The cost value.
+    function getCost() external view returns (uint256) {
+        return cost;
     }
 }
