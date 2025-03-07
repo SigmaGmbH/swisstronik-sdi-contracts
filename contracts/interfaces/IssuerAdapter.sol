@@ -22,4 +22,5 @@ interface IssuerAdapter {
     function revokeVerification(address userAddress, bytes memory verificationId) external;
     function setCost(uint256 _cost, address _paymentToken) external;
     function getCost() external view returns (uint256);
+    function getPaymentToken() external view returns (address);
 }

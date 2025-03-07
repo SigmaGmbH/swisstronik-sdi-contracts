@@ -9,7 +9,7 @@ import {IssuerAdapter} from "./interfaces/IssuerAdapter.sol";
 
 contract BaseIssuerAdapter is Initializable, OwnableUpgradeable, UUPSUpgradeable, IssuerAdapter {
     // cost value (could be in wei if native currency, or token smallest unit)
-    uint256 private cost;
+    uint256 public cost;
     // If paymentToken is address(0), then the cost is in native currency;
     // otherwise, it represents an ERC-20 token address.
     address public paymentToken;
@@ -137,4 +137,11 @@ contract BaseIssuerAdapter is Initializable, OwnableUpgradeable, UUPSUpgradeable
     function getCost() external view returns (uint256) {
         return cost;
     }
+
+    /// @notice Returns the current cost.
+    /// @return The cost value.
+    function getPaymentToken() external view returns (address) {
+        return paymentToken;
+    }
+
 }

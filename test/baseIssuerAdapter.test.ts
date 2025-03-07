@@ -252,7 +252,7 @@ describe("BaseIssuerAdapter", function () {
     it("Should return zero address as default payment token", async function() {
       const { adapter } = await loadFixture(deployAdapterFixture);
 
-      const token = await adapter.paymentToken();
+      const token = await adapter.getPaymentToken();
       expect(token).to.equal(ethers.ZeroAddress);
     });
   });
