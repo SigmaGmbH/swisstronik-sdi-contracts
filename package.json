@@ -33,7 +33,8 @@
   "scripts": {
     "build": "hardhat compile --force",
     "hardhat:compile": "hardhat compile --force",
-    "hardhat:deploy": "hardhat run scripts/deploy.ts --network testnet",
+    "hardhat:deploy": "hardhat run scripts/deploy.ts --network mainnet",
+    "hardhat:deploy_testnet": "hardhat run scripts/deploy.ts --network testnet",
     "test": "hardhat test",
     "coverage": "hardhat coverage"
   }

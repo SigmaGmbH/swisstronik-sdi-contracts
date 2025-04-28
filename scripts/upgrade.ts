@@ -6,7 +6,7 @@ async function main() {
   const [signer] = await ethers.getSigners();
   const SWTRProxy = await ethers.getContractAt(
     "SWTRProxy",
-    "0xBF896E5616d12fE6Bd7a376D2DBb924ff531CFDF" // proxy address
+    "0xb4646662b94F94DdbfCCa75f1b57602E1C8A28F1" // proxy address
   );
 
   const SWTRImplementation = await ethers.deployContract("SWTRImplementation");
@@ -15,7 +15,7 @@ async function main() {
 
   const proxyAdmin = await ethers.getContractAt(
     "ProxyAdmin",
-    "0x96e3ba5a33d21f64E5504Fd964656d1535a87F7e"
+    "0xB0da35bA30f6e2D03C40f4710090ce353E7eda57"
   );
 
   let tx: TransactionResponse = await sendShieldedTransaction(
