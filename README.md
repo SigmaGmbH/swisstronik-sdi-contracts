@@ -111,12 +111,12 @@ Returns:
 
 ## Deploy
 
-`npx hardhat run scripts/deploy.ts --network testnet`
+`npx hardhat run scripts/deploy.ts --network mainnet`
 
 
 ## Deployed Contracts
 
 | Contract   | Address                                    |
 |------------|--------------------------------------------|
-| ProxyAdmin | `0x96e3ba5a33d21f64E5504Fd964656d1535a87F7e` |
-| SWTRProxy  | `0xBF896E5616d12fE6Bd7a376D2DBb924ff531CFDF` |
+| ProxyAdmin | `0xB0da35bA30f6e2D03C40f4710090ce353E7eda57` |
+| SWTRProxy  | `0xb4646662b94F94DdbfCCa75f1b57602E1C8A28F1` |
