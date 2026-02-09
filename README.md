@@ -118,5 +118,5 @@ Returns:
 
 | Contract   | Address                                    |
 |------------|--------------------------------------------|
-| ProxyAdmin | `0xB0da35bA30f6e2D03C40f4710090ce353E7eda57` |
-| SWTRProxy  | `0xb4646662b94F94DdbfCCa75f1b57602E1C8A28F1` |
+| ProxyAdmin | `0x58d3a3fF1027dC222a74c34899D3d749B0F1369C` |
+| SWTRProxy  | `0xf92A79eEa504cf272f8e8Af51083203F1071b743` |
